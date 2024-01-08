@@ -41,11 +41,10 @@ func main() {
 	lis, err := net.Listen("tcp", os.Args[1])
 	if err != nil {
 		log.Fatal("Errore durante l'avvio del server RPC:", err)
+	} else {
+		// Consente al server RPC di accettare connessioni in arrivo sul listener
+		// e di gestire le richieste per ogni connessione in arrivo.
+		log.Printf("RPC main in ascolto sulla porta %s", lis.Addr())
+		server.Accept(lis)
 	}
-	log.Printf("RPC main in ascolto sulla porta %s", lis.Addr())
-
-	// Consente al server RPC di accettare connessioni in arrivo sul listener
-	// e di gestire le richieste per ogni connessione in arrivo.
-	server.Accept(lis)
-	//log.Printf("Richiesta servita da %s", os.Args)
 }

@@ -45,24 +45,27 @@ func main() {
 	defer func(listener net.Listener) {
 		err := listener.Close()
 		if err != nil {
-
+			log.Println("Errore durante la chiusura del listener:", err)
 		}
 	}(listener)
 	log.Println("Load Balancer in ascolto su", config.LoadBalancer)
 
-	// ...
-
 	// Loop infinito per gestire connessioni da diversi clienti
-	for currServer := 0; ; currServer = (currServer + 1) % config.NumberOfServer {
-		serverAddr := servers[currServer]
+	currServer := 0
+	for {
+		log.Println("Sono entrato nel for")
 
+		serverAddr := servers[currServer]
+		currServer = (currServer + 1) % config.NumberOfServer
+
+		log.Println("Ho impostato i parametri")
 		// Accetta una connessione e gestisci le richieste RPC
 		conn, err := listener.Accept()
 		if err != nil {
 			log.Println("Errore durante l'accettazione della connessione:", err)
 			continue
 		}
-
+		log.Println("Fatta accept, invio gorout")
 		// Imposta sull'istanza di ServiceLB l'indirizzo del server corrente
 		go func() {
 			serviceLoadB.SetServerAddress(serverAddr)
@@ -78,21 +81,4 @@ func main() {
 			}
 		}()
 	}
-
-	/*
-		// Ciclo infinito per gestire connessioni da diversi clienti
-		for currServer := 0; ; currServer = (currServer + 1) % config.NumberOfServer {
-
-			// Ottieni l'indirizzo del server corrente
-			serverAddr := servers[currServer]
-
-			// Imposta sull'istanza di ServiceLB l'indirizzo del server corrente
-			go func() {
-				serviceLoadB.SetServerAddress(serverAddr)
-				//log.Printf("Impostato indirizzo %s\n", serverAddr)
-
-				// Accetta una connessione e gestisci le richieste RPC
-				server.Accept(listener)
-			}()
-		} */
 }

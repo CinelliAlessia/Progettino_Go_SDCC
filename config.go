@@ -35,7 +35,7 @@ func LoadConfig() (*Config, error) {
 	defer func(file *os.File) {
 		err := file.Close()
 		if err != nil {
-			// Gestione degli errori durante la chiusura del file
+			log.Fatal("Errore durante la chiusura del file di configurazione:", err)
 		}
 	}(file)
 

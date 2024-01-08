@@ -1,3 +1,14 @@
+// client.go
+
+/*
+Il file client.go rappresenta il client che effettua chiamate RPC al Load Balancer.
+Carica la configurazione dal file di configurazione, mostra l'indirizzo del Load Balancer a cui connettersi e inizia la connessione.
+
+Se non vengono inseriti argomenti sufficienti, il programma termina con un messaggio di errore.
+Successivamente, converte gli argomenti in numeri interi, crea un'istanza di Args con i valori desiderati e di Result.
+Infine, effettua una chiamata alla procedura remota in modo sincrono, stampando il risultato ottenuto dal Load Balancer.
+*/
+
 package main
 
 import (
@@ -6,20 +17,19 @@ import (
 	"fmt"
 	"log"
 	"net/rpc"
-	_ "os"
+	"os"
 	"strconv"
-	"strings"
 )
 
 func main() {
-	// Carica la configurazione dal file di configurazione
+	// Caricamento della configurazione dal file di configurazione
 	config, err := configuration.LoadConfig()
 	if err != nil {
 		fmt.Println("Errore durante il caricamento della configurazione nel client:", err)
 		return
 	}
 
-	// Visualizza l'indirizzo del Load Balancer a cui ci si sta connettendo
+	// Mostra l'indirizzo del Load Balancer a cui connettersi
 	fmt.Println("Indirizzo del Load Balancer a cui connettersi:", config.LoadBalancer)
 
 	// Connessione al Load Balancer tramite TCP
@@ -29,61 +39,35 @@ func main() {
 		return
 	}
 	defer func(conn *rpc.Client) {
+		// Chiusura della connessione
 		err := conn.Close()
 		if err != nil {
-
+			// Gestisce eventuali errori durante la chiusura della connessione
 		}
 	}(conn)
 
-	// Loop infinito per consentire all'utente di inserire richieste continuamente
-	for {
-		fmt.Print("Inserisci due numeri separati da spazio (o 'stop' per terminare): ")
-		var input string
-		fmt.Scanln(&input)
-
-		// Verifica se l'utente ha inserito "stop" per terminare il loop
-		if strings.ToLower(input) == "stop" {
-			fmt.Println("Chiusura del client.")
-			break
-		}
-
-		// Parsa l'input dell'utente per ottenere gli argomenti della chiamata RPC
-		args := parseInput(input)
-		var result serviceLB.Result
-
-		// Effettua una chiamata alla procedura remota in modo sincrono
-		log.Printf("Effettuata chiamata sincrona\n")
-		err = conn.Call("Service.Sum", args, &result)
-		if err != nil {
-			log.Fatal("Errore in ForwardRequest:", err)
-		}
-
-		// Stampa il risultato ottenuto dalla chiamata RPC
-		fmt.Printf("Risultato: %d + %d = %d\n", args.A, args.B, result)
-		fmt.Println("Risultato ottenuto:", result)
-	}
-}
-
-// Funzione per parsare l'input dell'utente e ottenere gli argomenti della chiamata RPC
-func parseInput(input string) serviceLB.Args {
-	// Divide l'input in parti basate su spazi
-	parts := strings.Fields(input)
-	// Verifica se ci sono esattamente due parti
-	if len(parts) != 2 {
-		fmt.Println("Input non valido. Inserisci due numeri separati da spazio.")
-		return serviceLB.Args{}
+	// Verifica se sono presenti argomenti sufficienti
+	if len(os.Args) < 3 {
+		fmt.Printf("Argomenti non inseriti\n")
+		os.Exit(1)
 	}
 
-	// Converti le parti in numeri interi
-	n1, err1 := strconv.Atoi(parts[0])
-	n2, err2 := strconv.Atoi(parts[1])
+	// Converti gli argomenti in numeri interi
+	n1, _ := strconv.Atoi(os.Args[1])
+	n2, _ := strconv.Atoi(os.Args[2])
 
-	// Verifica se la conversione è avvenuta con successo
-	if err1 != nil || err2 != nil {
-		fmt.Println("Input non valido. Assicurati di inserire numeri validi.")
-		return serviceLB.Args{}
+	// Crea un'istanza di Args con i valori desiderati e di Result
+	args := serviceLB.Args{A: n1, B: n2}
+	var result serviceLB.Result
+
+	// Effettua una chiamata alla procedura remota in modo sincrono
+	log.Printf("Effettuata chiamata sincrona\n")
+	err = conn.Call("Service.Sum", args, &result)
+	if err != nil {
+		log.Fatal("Errore in ForwardRequest:", err)
 	}
 
-	// Restituisce gli argomenti della chiamata RPC
-	return serviceLB.Args{A: n1, B: n2}
+	// Stampa il risultato ottenuto dal Load Balancer
+	fmt.Printf("Risultato: %d + %d = %d\n", args.A, args.B, result)
+	fmt.Println("Risultato ottenuto:", result)
 }
