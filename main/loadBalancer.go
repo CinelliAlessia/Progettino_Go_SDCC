@@ -7,7 +7,6 @@ package main
 import (
 	configuration "ProgettoSDCC"
 	"ProgettoSDCC/serviceLB"
-	"fmt"
 	"log"
 	"net"
 	"net/rpc"
@@ -17,7 +16,7 @@ func main() {
 	// Carica la configurazione dal file di configurazione
 	config, err := configuration.LoadConfig()
 	if err != nil {
-		fmt.Println("Errore durante il caricamento della configurazione in LB:", err)
+		log.Println("Errore durante il caricamento della configurazione in LB:", err)
 		return
 	}
 
@@ -53,23 +52,19 @@ func main() {
 	// Loop infinito per gestire connessioni da diversi clienti
 	currServer := 0
 	for {
-		log.Println("Sono entrato nel for")
 
 		serverAddr := servers[currServer]
 		currServer = (currServer + 1) % config.NumberOfServer
 
-		log.Println("Ho impostato i parametri")
 		// Accetta una connessione e gestisci le richieste RPC
 		conn, err := listener.Accept()
 		if err != nil {
 			log.Println("Errore durante l'accettazione della connessione:", err)
 			continue
 		}
-		log.Println("Fatta accept, invio gorout")
 		// Imposta sull'istanza di ServiceLB l'indirizzo del server corrente
 		go func() {
 			serviceLoadB.SetServerAddress(serverAddr)
-			//log.Printf("Impostato indirizzo %s\n", serverAddr)
 
 			// Servi la connessione RPC
 			server.ServeConn(conn)
@@ -80,5 +75,13 @@ func main() {
 				return
 			}
 		}()
+
+		/* Versione sincrona bloccante ma che usa realmente rpc per la accept
+		serviceLoadB.SetServerAddress(serverAddr)
+		log.Printf("Impostato indirizzo %s\n", serverAddr)
+
+		// Accetta una connessione e gestisci le richieste RPC
+		server.Accept(listener)
+		*/
 	}
 }

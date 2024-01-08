@@ -1,10 +1,6 @@
 package main
 
-import (
-	"log"
-	"os/exec"
-)
-
+/*
 func main() {
 	config, err := ProgettoSDCC.LoadConfig()
 	if err != nil {
@@ -24,6 +20,6 @@ func main() {
 		/*
 			// Stampa l'output del comando
 			log.Println("Output del comando:")
-			log.Println(string(output))*/
+			log.Println(string(output))
 	}
-}
+}*/

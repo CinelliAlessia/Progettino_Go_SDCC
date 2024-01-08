@@ -45,6 +45,19 @@ func main() {
 		// Consente al server RPC di accettare connessioni in arrivo sul listener
 		// e di gestire le richieste per ogni connessione in arrivo.
 		log.Printf("RPC main in ascolto sulla porta %s", lis.Addr())
-		server.Accept(lis)
+
+		// Consente al server RPC di accettare connessioni in arrivo sul listener
+		// e di gestire le richieste per ogni connessione in arrivo.
+		for {
+			conn, err := lis.Accept() // <--- questo non è rpc (?)
+			if err != nil {
+				log.Fatal("Errore durante l'accettazione di una nuova connessione:", err)
+			}
+
+			go server.ServeConn(conn)
+		}
+
+		//server.Accept(lis) <-- questo è rpc
 	}
+
 }

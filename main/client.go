@@ -14,7 +14,6 @@ package main
 import (
 	configuration "ProgettoSDCC"
 	"ProgettoSDCC/serviceLB"
-	"fmt"
 	"log"
 	"net/rpc"
 	"os"
@@ -25,17 +24,17 @@ func main() {
 	// Caricamento della configurazione dal file di configurazione
 	config, err := configuration.LoadConfig()
 	if err != nil {
-		fmt.Println("Errore durante il caricamento della configurazione nel client:", err)
+		log.Println("Errore durante il caricamento della configurazione nel client:", err)
 		return
 	}
 
 	// Mostra l'indirizzo del Load Balancer a cui connettersi
-	fmt.Println("Indirizzo del Load Balancer a cui connettersi:", config.LoadBalancer)
+	log.Println("Indirizzo del Load Balancer a cui connettersi:", config.LoadBalancer)
 
 	// Connessione al Load Balancer tramite TCP
 	conn, err := rpc.Dial("tcp", config.LoadBalancer)
 	if err != nil {
-		fmt.Println("Errore durante la connessione al Load Balancer:", err)
+		log.Println("Errore durante la connessione al Load Balancer:", err)
 		return
 	}
 	defer func(conn *rpc.Client) {
@@ -48,7 +47,7 @@ func main() {
 
 	// Verifica se sono presenti argomenti sufficienti
 	if len(os.Args) < 3 {
-		fmt.Printf("Argomenti non inseriti\n")
+		log.Printf("Argomenti non inseriti\n")
 		os.Exit(1)
 	}
 
@@ -68,6 +67,6 @@ func main() {
 	}
 
 	// Stampa il risultato ottenuto dal Load Balancer
-	fmt.Printf("Risultato: %d + %d = %d\n", args.A, args.B, result)
-	fmt.Println("Risultato ottenuto:", result)
+	log.Printf("Risultato: %d + %d = %d\n", args.A, args.B, result)
+	log.Println("Risultato ottenuto:", result)
 }
