@@ -15,6 +15,7 @@ package main
 
 import (
 	"ProgettoSDCC/service"
+	"fmt"
 	"log"
 	"net"
 	"net/rpc"
@@ -23,7 +24,7 @@ import (
 
 func main() {
 	// Stampa l'indirizzo e la porta su cui il server RPC è in ascolto
-	log.Printf("RPC main in ascolto sulla porta %s", os.Args[1])
+	//fmt.Printf("server -> RPC main in ascolto sulla porta %s\n", os.Args[1])
 
 	// Crea un'istanza della struttura che implementa l'interfaccia Arith
 	arith := new(service.Arith)
@@ -31,27 +32,26 @@ func main() {
 	// Crea un nuovo server RPC
 	server := rpc.NewServer()
 
-	// Registra il servizio Arith presso il server RPC
+	// Registra il servizio Arith e il nuovo servizio Factorial presso il server RPC
 	err := server.RegisterName("Arithmetic", arith)
 	if err != nil {
-		log.Fatal("Formato del servizio Arith non corretto: ", err)
+		log.Fatal("server -> Formato del servizio Arith non corretto: ", err)
 	}
-
 	// Crea un listener per accettare connessioni sulla porta specificata
 	lis, err := net.Listen("tcp", os.Args[1])
 	if err != nil {
-		log.Fatal("Errore durante l'avvio del server RPC:", err)
+		log.Fatal("server -> Errore durante l'avvio del server RPC:", err)
 	} else {
 		// Consente al server RPC di accettare connessioni in arrivo sul listener
 		// e di gestire le richieste per ogni connessione in arrivo.
-		log.Printf("RPC main in ascolto sulla porta %s", lis.Addr())
+		fmt.Printf("server -> RPC main in ascolto sulla porta %s\n", lis.Addr())
 
 		// Consente al server RPC di accettare connessioni in arrivo sul listener
 		// e di gestire le richieste per ogni connessione in arrivo.
 		for {
 			conn, err := lis.Accept() // <--- questo non è rpc (?)
 			if err != nil {
-				log.Fatal("Errore durante l'accettazione di una nuova connessione:", err)
+				log.Fatal("server -> Errore durante l'accettazione di una nuova connessione:", err)
 			}
 
 			go server.ServeConn(conn)

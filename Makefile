@@ -1,19 +1,20 @@
 # Leggi il file di configurazione JSON e assegna i valori alle variabili
-CONFIG_FILE := config.json
-#LOAD_BALANCER := $(shell jq -r .addressLoadBalancer $(CONFIG_FILE))
-#SERVER_1 := $(shell jq -r .addressServers[0] $(CONFIG_FILE))
-#SERVER_2 := $(shell jq -r .addressServers[1] $(CONFIG_FILE))
-#SERVER_3 := $(shell jq -r .addressServers[2] $(CONFIG_FILE))
+CONFIG_FILE := .\configuration\config.json
+LOAD_BALANCER := $(shell jq -r .addressLoadBalancer $(CONFIG_FILE)) #inutile
+SERVER_ADDRESSES := $(shell jq -r .addressServers[] $(CONFIG_FILE))
+NUMBER_OF_SERVERS := $(shell jq -r .numberOfServers $(CONFIG_FILE))
 
-SERVER_1=localhost:8085
-SERVER_2=localhost:8086
-SERVER_3=localhost:8087
+all:
+	cd .\main && \
+	$(foreach addr, $(SERVER_ADDRESSES), start go run .\server.go $(addr) &&) \
+	start go run .\loadBalancer.go && \
+	start go run .\client.go && \
+	echo "Avviate ulteriori shell"
 
 server:
 	cd .\main && \
-	go run .\server.go $(SERVER_1) & \
-	go run .\server.go $(SERVER_2) & \
-	go run .\server.go $(SERVER_3)
+	$(foreach addr, $(SERVER_ADDRESSES), start go run .\server.go $(addr) &&) \
+	echo "Server avviati"
 
 loadBalancer:
 	cd .\main && \
@@ -21,4 +22,4 @@ loadBalancer:
 
 client:
 	cd .\main && \
-	go run .\client.go 5 5
+	start go run .\client.go &
