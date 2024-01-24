@@ -12,16 +12,19 @@ Infine, effettua una chiamata alla procedura remota in modo sincrono, stampando 
 package main
 
 import (
-	configuration "ProgettoSDCC"
+	"ProgettoSDCC"
 	"ProgettoSDCC/service"
 	"fmt"
 	"log"
 	"net/rpc"
+	"os"
+	"os/signal"
+	"syscall"
 )
 
 func main() {
 	// Caricamento della configurazione dal file di configurazione
-	config, err := configuration.LoadConfig()
+	config, err := ProgettoSDCC.LoadConfig()
 	if err != nil {
 		fmt.Println("Client -> Errore durante il caricamento della configurazione nel client:", err)
 		return
@@ -42,6 +45,26 @@ func main() {
 			fmt.Println("Client -> Errore durante la chiusura della connessione al Load Balancer:", err)
 		}
 	}(conn)
+
+	// Creazione di un canale per catturare i segnali
+	sigchan := make(chan os.Signal, 1)
+	signal.Notify(sigchan, syscall.SIGINT, syscall.SIGTERM)
+
+	// Attendi la ricezione di un segnale
+	go func() {
+		<-sigchan
+
+		// Chiusura della connessione RPC prima di terminare
+		err := conn.Close()
+		if err != nil {
+			fmt.Println("Client -> Errore durante la chiusura della connessione al Load Balancer:", err)
+		} else {
+			fmt.Println("Client -> Connessione chiusa correttamente.")
+		}
+
+		fmt.Println("Client -> Programma terminato a causa di un segnale di interruzione.")
+		os.Exit(1)
+	}()
 
 	for {
 		// Stampa il menu interattivo
@@ -90,7 +113,6 @@ func runOperation(conn *rpc.Client, choice int) {
 	}
 
 	if choice != 2 && choice != 3 { // Fattoriale e numero primo non hanno bisogno di inserire il secondo parametro
-
 		for {
 			fmt.Print("Inserisci il secondo parametro: ")
 			_, err := fmt.Scan(&args.B)
@@ -115,8 +137,12 @@ func runOperation(conn *rpc.Client, choice int) {
 		runMCDOperation(conn, args, &result)
 	}
 
-	//fmt.Printf("Risultato dell'operazione: %v\n\n", result)
 }
+
+/*
+Ciascuna delle funzioni implementate sotto, effettua una chiamata asincrona a un servizio esposto dal loadBalancer
+ma in maniera trasparente poiché il nome del servizio corrisponde al nome effettivo.
+*/
 
 func runSumOperation(conn *rpc.Client, args service.Args, result *service.Result) {
 	call := conn.Go("Service.Sum", args, result, nil)
@@ -163,6 +189,6 @@ func runMCDOperation(conn *rpc.Client, args service.Args, result *service.Result
 	if call.Error != nil {
 		log.Fatal("Errore durante la chiamata RPC:", call.Error)
 	}
-	fmt.Printf("Risultato dell'operazione: il MCD di %d è %v\n\n", args.A, *result)
+	fmt.Printf("Risultato dell'operazione: MCD(%d, %d) = %v\n\n", args.A, args.B, *result)
 
 }

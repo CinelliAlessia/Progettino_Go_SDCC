@@ -1,6 +1,5 @@
 {
     "addressLoadBalancer":"localhost:8080",
-
     "addressServers": [
     "localhost:8081",
     "localhost:8082",

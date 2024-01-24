@@ -1,5 +1,5 @@
 CONFIG_FILE := ./configuration/config.json
-LOAD_BALANCER := $(shell jq -r .addressLoadBalancer $(CONFIG_FILE)) #inutile
+#LOAD_BALANCER := $(shell jq -r .addressLoadBalancer $(CONFIG_FILE)) #inutile
 SERVER_ADDRESSES := $(shell jq -r .addressServers[] $(CONFIG_FILE))
 NUMBER_OF_SERVERS := $(shell jq -r .numberOfServers $(CONFIG_FILE))
 
@@ -11,11 +11,10 @@ windows:
 	echo "Avviate ulteriori shell"
 
 unix:
-	# !!!---IMPORTANTE---!!!
-	# Per eseguire correttamente in Unix bisogna modificare il path nel file `config.go`:
-	#Sostituire `const filename = "..\\configuration\\config.json"` con `const filename = "../configuration/config.json"`.
 	cd ./main && \
-	$(foreach addr, $(SERVER_ADDRESSES), go run ./server.go $(addr) &) \
-	go run ./loadBalancer.go & \
-	go run ./client.go & \
-	echo "Avviate ulteriori shell"
+    	{ \
+    		$(foreach addr, $(SERVER_ADDRESSES), \
+    			x-terminal-emulator -e "go run ./server.go $(addr)" &) \
+    		x-terminal-emulator -e "go run ./loadBalancer.go" & \
+    		x-terminal-emulator -e "go run ./client.go" & \
+    	};

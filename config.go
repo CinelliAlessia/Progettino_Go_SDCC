@@ -6,7 +6,7 @@ Contiene una struttura Config che rappresenta gli indirizzi del Load Balancer e 
 La funzione LoadConfig apre il file di configurazione, lo decodifica in una struttura Config e restituisce un'istanza di Config.
 */
 
-package configuration
+package ProgettoSDCC
 
 import (
 	"encoding/json"
@@ -15,7 +15,7 @@ import (
 )
 
 // Costante che rappresenta il percorso del file di configurazione
-const filename = "..\\configuration\\config.json"
+const filename = "../configuration/config.json"
 
 // Config rappresenta gli indirizzi del Load Balancer e dei Servers, e il numero totale di Servers
 type Config struct {

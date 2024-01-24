@@ -4,34 +4,65 @@
 
 ## Descrizione
 
-Il progetto implementa un sistema distribuito con chiamate RPC (Remote Procedure Call) in Go. Il sistema è composto da un Load Balancer, un insieme di server replicati e un client che effettua chiamate RPC attraverso il Load Balancer. Il Load Balancer agisce come proxy tra il client e i server replicati, distribuendo equamente le richieste.
-
+Il progetto implementa un sistema distribuito con chiamate RPC (Remote Procedure Call) in Go. Il sistema è composto da un Load Balancer,
+un insieme di server replicati e un client che effettua chiamate RPC attraverso il Load Balancer. Il Load Balancer agisce come proxy tra
+il client e i server replicati, distribuendo equamente le richieste, tramite la politica Round Robin.
 I server replicati forniscono un servizio di calcolo aritmetico tramite chiamate RPC.
 
-## Struttura del Progetto
-
-Il progetto è organizzato nei seguenti moduli:
-
-- `configuration`: Gestisce la lettura del file di configurazione `config.json`, il quale contiene gli indirizzi del Load Balancer e dei Servers, e il numero totale di Servers.
-
-- `main`: Contiene i file principali `loadBalancer.go`, `server.go`, e `client.go`. Questi file implementano il Load Balancer, i Servers replicati e il Client che effettua chiamate RPC.
-
-- `service`: Contiene il file `serviceS.go`, che implementa l'interfaccia RPC e fornisce il servizio di calcolo aritmetico nei Servers.
-
-- `serviceLB`: Contiene il file `serviceLB.go`, che implementa il servizio nel Load Balancer per gestire la trasparenza di replicazione tramite chiamate RPC.
 
 ## Istruzioni per l'Esecuzione
-Il progetto include un Makefile per semplificare il processo di esecuzione. Utilizzare il comando `make` seguito dal target desiderato.
 
-Questo progetto è stato sviluppato su una piattaforma Windows. Per essere eseguito, utilizzare il comando `make windows`.
+Il progetto include un Makefile utilizzabile con due target, windows e unix.
+Il Makefile tramite il comando jq legge le informazioni dal file di configurazione per avviare correttamente i server
+replicati.
+In entrambi i target verranno aperti tante prompt dei comandi per ciascun file:
+1. In Windows tramite il comando start
+2. In Unix tramite x-terminal-emulator (installare se necessario)
 
-Se si desidera eseguirlo su Unix, seguire i seguenti passaggi:
-
-1. Modificare il path nel file `config.go`: Sostituire `const filename = "..\\configuration\\config.json"` con `const filename = "../configuration/config.json"`.
-
-2. Utilizzare il comando `make unix`.
+Un alternativa al makefile è eseguire ciascun file contenuto in ProgettoSDCC/main, ma notare che il server prende come argomento
+l'indirizzo e porta su cui deve esporsi.
 
 ## Requisiti
 
 - Go (versione utilizzata: Go 1.21)
 - jq (necessario per un utilizzo corretto del Makefile)
+- x-terminal-emulator (necessario per un utilizzo corretto del Makefile in unix)
+
+## Struttura delle cartelle
+
+ProgettoSDCC/
+|-- main/
+|   |-- client.go
+|   |-- loadBalancer.go
+|   |-- server.go
+
+|-- configuration/
+|   |-- config.json
+
+|-- serviceLB/
+|   |-- serviceLB.go
+
+|-- serviceS/
+|   |-- serviceS.go
+
+|-- config.go
+|-- go.mod
+|-- README
+
+
+## Struttura del Progetto
+
+Il progetto è organizzato nei seguenti moduli:
+
+- `configuration`: Gestisce la lettura del file di configurazione `config.json`, il quale contiene gli indirizzi del Load Balancer
+e dei Servers, e il numero totale di Servers.
+
+- `main`: Contiene i file principali `loadBalancer.go`, `server.go`, e `client.go`.
+Questi file implementano il Load Balancer,i Servers replicati e il Client che effettua chiamate RPC.
+
+- `service`: Contiene il file `serviceS.go`, che implementa l'interfaccia RPC e fornisce il servizio di calcolo
+aritmetico nei Servers. Questa interfaccia viene esposta dai server e utilizzata dal LoadBalancer.
+
+- `serviceLB`: Contiene il file `serviceLB.go`, che implementa il servizio nel Load Balancer
+per gestire la trasparenza di replicazione tramite chiamate RPC. Questa interfaccia viene esposta dal LoadBalancer e
+utilizzata dai client.
