@@ -1,4 +1,4 @@
-# Progetto SDCC - Sistema Distribuito con Chiamate RPC in Go 2023/2024
+# Progetto SDCC - Sistema Distribuito con Chiamate RPC in Go 2023/2024 - Cinelli Alessia 0350265
 
 **Scadenza consegna: 26/01/2024**
 
@@ -12,10 +12,12 @@ I server replicati forniscono un servizio di calcolo aritmetico tramite chiamate
 
 ## Istruzioni per l'Esecuzione
 
+Utilizzare il file configuration/config.go per modificare il numero di server, i loro indirizzi e l'indirizzo e porta del Load Balancer
+
 Il progetto include un Makefile utilizzabile con due target, windows e unix.
 Il Makefile tramite il comando jq legge le informazioni dal file di configurazione per avviare correttamente i server
 replicati.
-In entrambi i target verranno aperti tante prompt dei comandi per ciascun file:
+In entrambi i target verranno aperti tanti prompt dei comandi per ciascun file:
 1. In Windows tramite il comando start
 2. In Unix tramite x-terminal-emulator (installare se necessario)
 
@@ -63,6 +65,5 @@ Questi file implementano il Load Balancer,i Servers replicati e il Client che ef
 - `service`: Contiene il file `serviceS.go`, che implementa l'interfaccia RPC e fornisce il servizio di calcolo
 aritmetico nei Servers. Questa interfaccia viene esposta dai server e utilizzata dal LoadBalancer.
 
-- `serviceLB`: Contiene il file `serviceLB.go`, che implementa il servizio nel Load Balancer
-per gestire la trasparenza di replicazione tramite chiamate RPC. Questa interfaccia viene esposta dal LoadBalancer e
+- `serviceLB`: Contiene il file `serviceLB.go`. Questa interfaccia viene esposta dal LoadBalancer e
 utilizzata dai client.
